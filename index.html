@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kirim Chiqim — Istoriya</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { --bg: var(--tg-theme-bg-color, #0f172a); --fg: var(--tg-theme-text-color, #fff); --hint: var(--tg-theme-hint-color, #94a3b8);
+          --btn: var(--tg-theme-button-color, #22c55e); --btnfg: var(--tg-theme-button-text-color, #fff); }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, system-ui, Roboto, sans-serif; background: var(--bg); color: var(--fg);
+         display: flex; flex-direction: column; align-items: center; padding: 16px 16px 28px; min-height: 100vh; }
+  img { width: 62%; max-width: 260px; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  h1 { font-size: 20px; margin: 18px 0 6px; text-align: center; }
+  p { color: var(--hint); font-size: 15px; text-align: center; margin: 0 0 18px; line-height: 1.4; }
+  button { width: 100%; max-width: 420px; border: 0; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 600;
+           background: var(--btn); color: var(--btnfg); }
+  .msg { margin-top: 14px; font-size: 14px; color: var(--hint); text-align: center; min-height: 20px; }
+</style>
+</head>
+<body>
+  <img id="pic" src="story.png" alt="">
+  <h1 id="h"></h1>
+  <p id="p"></p>
+  <button id="share"></button>
+  <div class="msg" id="msg"></div>
+<script>
+  const T = {
+    uz: { h: "Istoriyaga joylang — +1 oy Premium!", p: "Tugmani bosing, Telegram istoriya oynasi rasm bilan ochiladi. Joylagach botga qaytib «✅ Joyladim» ni bosing.",
+          b: "📲 Istoriyaga joylash", text: "💰 Kirim-chiqimni Telegram'da yuritaman — Kirim Chiqim bot! 👉 ", old: "Telegram ilovangizni yangilang — istoriyaga ulashish uchun yangi versiya kerak.", done: "Joylagach botga qayting va «✅ Joyladim» ni bosing 👌", link: "Botni ochish" },
+    ru: { h: "Опубликуйте в сторис — +1 месяц Premium!", p: "Нажмите кнопку — откроется редактор сторис с картинкой. После публикации вернитесь в бот и нажмите «✅ Опубликовал».",
+          b: "📲 Опубликовать в сторис", text: "💰 Веду доходы и расходы в Telegram — бот Kirim Chiqim! 👉 ", old: "Обновите Telegram — для публикации в сторис нужна новая версия.", done: "После публикации вернитесь в бот и нажмите «✅ Опубликовал» 👌", link: "Открыть бот" },
+    en: { h: "Post it to your story — +1 month of Premium!", p: "Tap the button — the story editor opens with the picture. After posting, go back to the bot and tap «✅ Posted».",
+          b: "📲 Post to story", text: "💰 I track my money in Telegram — Kirim Chiqim bot! 👉 ", old: "Please update Telegram — posting to stories needs a newer version.", done: "After posting, go back to the bot and tap «✅ Posted» 👌", link: "Open bot" }
+  };
+  const q = new URLSearchParams(location.search);
+  const L = T[q.get('lang')] ? q.get('lang') : 'uz';
+  const t = T[L];
+  const bot = (q.get('bot') || '').replace(/[^\w]/g, '');
+  const ref = (q.get('ref') || '').replace(/\D/g, '');
+  const link = 'https://t.me/' + bot + (ref ? '?start=ref_' + ref : '');
+  document.getElementById('h').textContent = t.h;
+  document.getElementById('p').textContent = t.p;
+  const btn = document.getElementById('share'), msg = document.getElementById('msg');
+  btn.textContent = t.b;
+  const tg = window.Telegram && Telegram.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
+  btn.onclick = function () {
+    if (!tg || !tg.shareToStory || !tg.isVersionAtLeast || !tg.isVersionAtLeast('7.8')) { msg.textContent = t.old; return; }
+    const media = new URL('story.png', location.href).href;
+    const params = { text: (t.text + link).slice(0, 200) };
+    const user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (user && user.is_premium) params.widget_link = { url: link, name: 'Kirim Chiqim' };
+    try { tg.shareToStory(media, params); msg.textContent = t.done; }
+    catch (e) { msg.textContent = t.old; }
+  };
+</script>
+</body>
+</html>
